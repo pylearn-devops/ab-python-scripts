@@ -46,6 +46,27 @@ def find_broken_links(directory):
     return broken_links
 
 
+# def check_link(link):
+#     try:
+#         options = Options()
+#         options.add_argument('--headless')
+#         options.add_argument('--disable-gpu')
+#         options.add_argument('--no-sandbox')
+#         options.add_argument('--disable-dev-shm-usage')
+#
+#         driver = webdriver.Chrome(options=options)
+#         driver.get(link)
+#
+#         # Check for specific patterns in the page content indicating redirection or "sorry" message
+#         if "sorry" in driver.page_source.lower() or "redirect" in driver.page_source.lower():
+#             return False
+#         else:
+#             return True
+#     except:
+#         return False
+#     finally:
+#         driver.quit()
+
 broken_links = find_broken_links(root_directory)
 
 if broken_links:
@@ -54,3 +75,4 @@ if broken_links:
         print(f"File: {link_info[0]}, Broken Link: {link_info[1]}")
 else:
     print("No broken links found.")
+    
