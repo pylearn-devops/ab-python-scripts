@@ -38,15 +38,15 @@ function extractLinks(data) {
 }
 
 function checkLinks(links, filePath) {
-  markdownLinkCheck(links, (err, results) => {
+  markdownLinkCheck(links.map(link => ({ href: link })), (err, results) => {
     if (err) {
       console.error('Error checking links:', err);
       return;
     }
-    results.forEach(result => {
+    results.forEach((result, index) => {
       if (result.status !== 'alive') {
         console.log(`Broken link found in ${filePath}:`);
-        console.log(`  Link: ${result.link}`);
+        console.log(`  Link: ${links[index]}`);
         console.log(`  Error: ${result.error}`);
       }
     });
