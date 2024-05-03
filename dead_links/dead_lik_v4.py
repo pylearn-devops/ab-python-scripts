@@ -1,6 +1,7 @@
 import os
 import markdown
 import requests
+import re
 
 def is_valid_url(url):
     try:
@@ -9,6 +10,11 @@ def is_valid_url(url):
     except requests.RequestException:
         return False
 
+def find_links(content):
+    # Regular expression to find Markdown links
+    link_pattern = r'\[([^\]]+)\]\(([^\)]+)\)'
+    return re.findall(link_pattern, content)
+
 def check_md_files(directory):
     for root, _, files in os.walk(directory):
         for file in files:
@@ -16,10 +22,8 @@ def check_md_files(directory):
                 filepath = os.path.join(root, file)
                 with open(filepath, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    md = markdown.Markdown()
-                    md.convert(content)
-                    for link in md.links:
-                        url = link.get('href')
+                    links = find_links(content)
+                    for title, url in links:
                         if url.startswith('https://'):
                             if is_valid_url(url):
                                 print(f"Valid HTTPS link: {url} (in {file})")
