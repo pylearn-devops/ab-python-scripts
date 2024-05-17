@@ -12,6 +12,47 @@ class TestPagerDutyModule(unittest.TestCase):
         data = load_data_from_json('dummy.json')
         self.assertEqual(data, {"policy1": "Policy One"})
     
+  
+
+    @patch('pdpyras.APISession')
+    @patch('your_module.session.get')
+    @patch('your_module.session.iter_all')
+    def test_get_on_calls(self, mock_iter_all, mock_get, MockAPISession):
+        from your_module import get_on_calls
+
+        # Mock response for escalation policy
+        mock_get.side_effect = [
+            Mock(status_code=200, json=lambda: {
+                'escalation_policy': {'name': 'Policy One'}
+            }),
+            Mock(status_code=200, json=lambda: {
+                'user': {'name': 'User One', 'email': 'user1@example.com'}
+            }),
+            Mock(status_code=200, json=lambda: {
+                'user': {'name': 'User Two', 'email': 'user2@example.com'}
+            })
+        ]
+
+        # Mock response for iter_all
+        mock_iter_all.return_value = [
+            {'escalation_level': 1, 'user': {'id': 'U1'}},
+            {'escalation_level': 1, 'user': {'id': 'U2'}}
+        ]
+
+        escalation_policy_ids = ['P1']
+        expected_result = {
+            'Policy One': ['user1@example.com', 'user2@example.com']
+        }
+
+        result = get_on_calls(escalation_policy_ids)
+
+        self.assertEqual(result, expected_result)
+        mock_get.assert_any_call('escalation_policies/P1')
+        mock_get.assert_any_call('users/U1')
+        mock_get.assert_any_call('users/U2')
+        mock_iter_all.assert_called_once_with('oncalls', params={'escalation_policy_ids[]': 'P1'})
+
+    
     @patch('pdpyras.APISession')
     @patch('your_module.get_on_calls')
     @patch('your_module.get_slack_user_id', return_value='U12345')
