@@ -1,0 +1,38 @@
+import unittest
+from unittest.mock import patch, MagicMock
+from github import GithubException
+
+class TestMarkdownProcessing(unittest.TestCase):
+
+    @patch('your_module_name.repo.get_contents')
+    def test_get_policy_ids_success(self, mock_get_contents):
+        # Mock the response from the GitHub API
+        mock_file = MagicMock()
+        mock_file.decoded_content = b"|Header1|Header2|Header3|Escalation ID|\n|---|---|---|---|\n|row1col1|row1col2|row1col3|123|\n|row2col1|row2col2|row2col3|456|"
+        mock_get_contents.return_value = mock_file
+
+        from your_module_name import get_policy_ids
+
+        # Call the function
+        escalation_ids = get_policy_ids()
+
+        # Assertions
+        self.assertEqual(escalation_ids, ["123", "456"])
+        mock_get_contents.assert_called_once_with("policies.md")
+
+    @patch('your_module_name.repo.get_contents')
+    def test_get_policy_ids_failure(self, mock_get_contents):
+        # Simulate a GitHubException
+        mock_get_contents.side_effect = GithubException(404, "Not Found", None)
+
+        from your_module_name import get_policy_ids
+
+        # Call the function
+        escalation_ids = get_policy_ids()
+
+        # Assertions
+        self.assertIsNone(escalation_ids)
+        mock_get_contents.assert_called_once_with("policies.md")
+
+if __name__ == "__main__":
+    unittest.main()
