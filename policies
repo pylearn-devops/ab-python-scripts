@@ -1,0 +1,18 @@
+
+contents = repo.get_contents("policies.md")
+markdown_content = contents.decoded_content.decode("utf-8")
+
+# Adjust the regular expression to accurately capture table rows
+regex = re.compile(r'\|([^|]+)\|([^|]+)\|')
+
+rows = regex.findall(markdown_content)
+
+escalation_ids = []
+
+for row in rows:
+    if len(row) > 1:
+        escalation_id = row[1].strip()  # Adjust to capture the correct column
+        if escalation_id and escalation_id != '-':  # Avoid dashes and empty strings
+            escalation_ids.append(escalation_id)
+
+print(escalation_ids)
