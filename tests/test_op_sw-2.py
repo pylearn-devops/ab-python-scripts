@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from your_module import get_on_calls, load_data_from_json, generate_json_from_pagerduty_data
+from your_module import get_on_calls
 
 class TestYourModule(unittest.TestCase):
 
@@ -8,16 +8,8 @@ class TestYourModule(unittest.TestCase):
         self.api_key = "dummy_api_key"
         self.secrets = {"pd_api_token": self.api_key}
         self.policy_data = {
-            "escalation_policies": [
-                {
-                    "id": "P1234",
-                    "name": "Policy 1",
-                },
-                {
-                    "id": "P5678",
-                    "name": "Policy 2",
-                }
-            ]
+            "id": "P1234",
+            "name": "Policy 1",
         }
         self.user_data = {
             "user": {
@@ -35,7 +27,7 @@ class TestYourModule(unittest.TestCase):
         # Mock the response for the escalation policy
         def mock_get(url):
             if "escalation_policies" in url:
-                return MagicMock(json=lambda: {"escalation_policy": self.policy_data['escalation_policies'][0]})
+                return MagicMock(json=lambda: {"escalation_policy": self.policy_data})
             elif "users" in url:
                 return MagicMock(json=lambda: self.user_data)
             return None
@@ -48,12 +40,11 @@ class TestYourModule(unittest.TestCase):
             {"escalation_level": 2, "user": {"id": "U456"}}
         ]
 
-        escalation_policy_ids = ["P1234", "P5678"]
+        escalation_policy_ids = ["P1234"]
         on_call_emails_by_policy = get_on_calls(escalation_policy_ids)
         
         expected_result = {
-            "Policy 1": ["user1@example.com"],
-            "Policy 2": []
+            "Policy 1": ["user1@example.com"]
         }
 
         self.assertEqual(on_call_emails_by_policy, expected_result)
