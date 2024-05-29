@@ -1,0 +1,6 @@
+Feature: Check DynamoDB Table Creation
+
+  Scenario: Verify if DynamoDB table exists
+    Given I have a DynamoDB client
+    When I check for the DynamoDB table named "TestTable"
+    Then the table "TestTable" should exist and be active in DynamoDB
