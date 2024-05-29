@@ -1,0 +1,41 @@
+Parameters:
+  EnvironmentGroup:
+    Type: String
+    Description: Deployment environment group such as dev, qa, or prod
+    AllowedValues:
+      - dev
+      - qa
+      - prod
+    Default: dev
+
+Resources:
+  MyDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'MyTable-${EnvironmentGroup}'
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+        - AttributeName: GSIKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: MyGSI
+          KeySchema:
+            - AttributeName: GSIKey
+              KeyType: HASH
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - Attribute1
+              - Attribute2
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+
+  # Other resources...
