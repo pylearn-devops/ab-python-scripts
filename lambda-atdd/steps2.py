@@ -22,10 +22,10 @@ def step_when_check_lambda_exists(context):
 def step_then_lambda_should_exist(context):
     assert context.lambda_exists, f"Lambda function {context.lambda_name} does not exist"
 
-@given('I have the Lambda function name and the rule name "{rule_name}"')
-def step_given_lambda_function_and_rule_name(context, rule_name):
+@given('I have the Lambda function name and the rule name')
+def step_given_lambda_function_and_rule_name(context):
     assert context.lambda_name, "Lambda function name is not set"
-    context.rule_name = rule_name
+    assert context.rule_name, "EventBridge rule name is not set"
 
 @when('I check if the EventBridge rule is attached to the Lambda alias "live_traffic"')
 def step_when_check_eventbridge_rule_attached_to_alias(context):
