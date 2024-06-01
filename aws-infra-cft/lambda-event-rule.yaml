@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Lambda and EventBridge Rule deployment with conditions
+
+Parameters:
+  Environment:
+    Type: String
+    Description: The deployment environment
+    AllowedValues:
+      - dev
+      - qa
+    Default: dev
+
+Conditions:
+  IsDev:
+    Fn::Equals: [ !Ref Environment, dev ]
+  IsQa:
+    Fn::Equals: [ !Ref Environment, qa ]
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: MyLambdaFunction
+      Handler: index.handler
+      Role: arn:aws:iam::123456789012:role/execution_role
+      Code:
+        S3Bucket: my-bucket
+        S3Key: my-lambda-code.zip
+      Runtime: python3.9
+
+  MyEventBridgeRule1:
+    Type: AWS::Events::Rule
+    Condition: IsDev
+    Properties:
+      Name: MyEventBridgeRule1
+      EventPattern:
+        source:
+          - "aws.source"
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV1"
+
+  MyEventBridgeRule2:
+    Type: AWS::Events::Rule
+    Condition: IsQa
+    Properties:
+      Name: MyEventBridgeRule2
+      EventPattern:
+        source:
+          - "aws.source"
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV2"
+
+  MyEventBridgeRule3:
+    Type: AWS::Events::Rule
+    Condition: IsQa
+    Properties:
+      Name: MyEventBridgeRule3
+      EventPattern:
+        source:
+          - "aws.source"
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV3"
+
+Outputs:
+  LambdaFunctionArn:
+    Description: The ARN of the Lambda function
+    Value: !GetAtt MyLambdaFunction.Arn
