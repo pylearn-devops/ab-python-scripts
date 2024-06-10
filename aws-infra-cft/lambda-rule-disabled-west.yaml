@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Lambda and EventBridge Rule deployment with conditions, permissions, and logging configuration
+
+Parameters:
+  Environment:
+    Type: String
+    Description: The deployment environment
+    AllowedValues:
+      - dev
+      - qa
+    Default: dev
+
+  LoggingConfig:
+    Type: String
+    Description: The logging configuration for the Lambda function
+    AllowedValues:
+      - json
+      - text
+    Default: json
+
+Conditions:
+  IsDev:
+    Fn::Equals: [ !Ref Environment, dev ]
+  IsQa:
+    Fn::Equals: [ !Ref Environment, qa ]
+  IsWestRegion:
+    Fn::Or:
+      - Fn::Equals: [ !Ref "AWS::Region", "us-west-1" ]
+      - Fn::Equals: [ !Ref "AWS::Region", "us-west-2" ]
+
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: MyLambdaFunction
+      Handler: index.handler
+      Role: arn:aws:iam::123456789012:role/execution_role
+      Code:
+        S3Bucket: my-bucket
+        S3Key: my-lambda-code.zip
+      Runtime: python3.9
+      Environment:
+        Variables:
+          LOG_FORMAT: !Ref LoggingConfig
+
+  MyEventBridgeRule1:
+    Type: AWS::Events::Rule
+    Condition: IsDev
+    Properties:
+      Name: MyEventBridgeRule1
+      EventPattern:
+        source:
+          - "aws.source"
+      State: !If [IsWestRegion, DISABLED, ENABLED]
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV1"
+
+  MyEventBridgeRule2:
+    Type: AWS::Events::Rule
+    Condition: IsQa
+    Properties:
+      Name: MyEventBridgeRule2
+      EventPattern:
+        source:
+          - "aws.source"
+      State: !If [IsWestRegion, DISABLED, ENABLED]
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV2"
+
+  MyEventBridgeRule3:
+    Type: AWS::Events::Rule
+    Condition: IsQa
+    Properties:
+      Name: MyEventBridgeRule3
+      EventPattern:
+        source:
+          - "aws.source"
+      State: !If [IsWestRegion, DISABLED, ENABLED]
+      Targets:
+        - Arn: !GetAtt MyLambdaFunction.Arn
+          Id: "TargetFunctionV3"
+
+  LambdaPermissionForEventBridge1:
+    Type: AWS::Lambda::Permission
+    Condition: IsDev
+    Properties:
+      FunctionName: !Ref MyLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt MyEventBridgeRule1.Arn
+
+  LambdaPermissionForEventBridge2:
+    Type: AWS::Lambda::Permission
+    Condition: IsQa
+    Properties:
+      FunctionName: !Ref MyLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt MyEventBridgeRule2.Arn
+
+  LambdaPermissionForEventBridge3:
+    Type: AWS::Lambda::Permission
+    Condition: IsQa
+    Properties:
+      FunctionName: !Ref MyLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt MyEventBridgeRule3.Arn
+
+Outputs:
+  LambdaFunctionArn:
+    Description: The ARN of the Lambda function
+    Value: !GetAtt MyLambdaFunction.Arn
