@@ -11,7 +11,7 @@ class TestGitHubPRsIssues(unittest.TestCase):
     @patch('your_script.get_secret')
     def setUp(self, mock_get_secret, mock_github):
         # Set up mocks for secrets and GitHub API
-        mock_get_secret.return_value = 'mock_secret_value'
+        mock_get_secret.side_effect = lambda key: 'mock_secret_value'
         self.mock_github_instance = MagicMock()
         mock_github.return_value = self.mock_github_instance
 
@@ -26,6 +26,8 @@ class TestGitHubPRsIssues(unittest.TestCase):
         self.mock_pr.number = 1
         self.mock_pr.title = "Test PR"
         self.mock_pr.user.login = "test_user"
+        self.mock_pr.create_issue_comment.return_value = None
+        self.mock_pr.edit.return_value = None
 
         self.mock_issue = MagicMock()
         self.mock_issue.created_at = datetime(2022, 1, 1, tzinfo=timezone.utc)
@@ -34,6 +36,8 @@ class TestGitHubPRsIssues(unittest.TestCase):
         self.mock_issue.number = 1
         self.mock_issue.title = "Test Issue"
         self.mock_issue.user.login = "test_user"
+        self.mock_issue.create_comment.return_value = None
+        self.mock_issue.edit.return_value = None
 
         self.mock_repo.get_pulls.return_value = [self.mock_pr]
         self.mock_repo.get_issues.return_value = [self.mock_issue]
@@ -50,10 +54,14 @@ class TestGitHubPRsIssues(unittest.TestCase):
         self.assertEqual(closed_count, 1)
         self.assertEqual(len(exempt_prs), 0)
         self.assertEqual(len(exempt_issues), 0)
-        
+
         # Verify methods were called
         self.mock_repo.get_pulls.assert_called_once_with(state='open')
         self.mock_repo.get_issues.assert_called_once_with(state='open')
+        self.mock_pr.create_issue_comment.assert_called_once()
+        self.mock_pr.edit.assert_called_once_with(state='closed')
+        self.mock_issue.create_comment.assert_called_once()
+        self.mock_issue.edit.assert_called_once_with(state='closed')
 
     def test_close_pulls_and_issues_for_orgs(self):
         closed_count, exempt_prs, exempt_issues = close_pulls_and_issues_for_orgs()
@@ -61,6 +69,14 @@ class TestGitHubPRsIssues(unittest.TestCase):
         self.assertEqual(closed_count, 1)
         self.assertEqual(len(exempt_prs), 0)
         self.assertEqual(len(exempt_issues), 0)
+
+        # Verify methods were called
+        self.mock_repo.get_pulls.assert_called_once_with(state='open')
+        self.mock_repo.get_issues.assert_called_once_with(state='open')
+        self.mock_pr.create_issue_comment.assert_called_once()
+        self.mock_pr.edit.assert_called_once_with(state='closed')
+        self.mock_issue.create_comment.assert_called_once()
+        self.mock_issue.edit.assert_called_once_with(state='closed')
 
 if __name__ == '__main__':
     unittest.main()
