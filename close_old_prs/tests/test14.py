@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
 
 # Import the functions and any necessary modules from your script
-from your_script import close_pulls_and_issues, close_pulls_and_issues_for_orgs
+from your_script import close_pulls_and_issues, close_pulls_and_issues_for_orgs, EXEMPT_LABELS
 
 class TestGitHubPRsIssues(unittest.TestCase):
 
@@ -51,6 +51,10 @@ class TestGitHubPRsIssues(unittest.TestCase):
         org_name = "mock_org"
         closed_count, exempt_prs, exempt_issues = close_pulls_and_issues(org_name)
 
+        print(f"Closed Count: {closed_count}")
+        print(f"Exempt PRs: {exempt_prs}")
+        print(f"Exempt Issues: {exempt_issues}")
+
         self.assertEqual(closed_count, 1)
         self.assertEqual(len(exempt_prs), 0)
         self.assertEqual(len(exempt_issues), 0)
@@ -65,6 +69,10 @@ class TestGitHubPRsIssues(unittest.TestCase):
 
     def test_close_pulls_and_issues_for_orgs(self):
         closed_count, exempt_prs, exempt_issues = close_pulls_and_issues_for_orgs()
+
+        print(f"Closed Count: {closed_count}")
+        print(f"Exempt PRs: {exempt_prs}")
+        print(f"Exempt Issues: {exempt_issues}")
 
         self.assertEqual(closed_count, 1)
         self.assertEqual(len(exempt_prs), 0)
