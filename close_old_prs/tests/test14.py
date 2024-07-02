@@ -55,9 +55,10 @@ class TestGitHubPRsIssues(unittest.TestCase):
         print(f"Exempt PRs: {exempt_prs}")
         print(f"Exempt Issues: {exempt_issues}")
 
-        self.assertEqual(closed_count, 1)
-        self.assertEqual(len(exempt_prs), 0)
-        self.assertEqual(len(exempt_issues), 0)
+        # Assert to help debug if it fails
+        self.assertEqual(closed_count, 1, f"Expected closed_count to be 1, but got {closed_count}")
+        self.assertEqual(len(exempt_prs), 0, f"Expected exempt PRs count to be 0, but got {len(exempt_prs)}")
+        self.assertEqual(len(exempt_issues), 0, f"Expected exempt Issues count to be 0, but got {len(exempt_issues)}")
 
         # Verify methods were called
         self.mock_repo.get_pulls.assert_called_once_with(state='open')
@@ -74,9 +75,10 @@ class TestGitHubPRsIssues(unittest.TestCase):
         print(f"Exempt PRs: {exempt_prs}")
         print(f"Exempt Issues: {exempt_issues}")
 
-        self.assertEqual(closed_count, 1)
-        self.assertEqual(len(exempt_prs), 0)
-        self.assertEqual(len(exempt_issues), 0)
+        # Assert to help debug if it fails
+        self.assertEqual(closed_count, 1, f"Expected closed_count to be 1, but got {closed_count}")
+        self.assertEqual(len(exempt_prs), 0, f"Expected exempt PRs count to be 0, but got {len(exempt_prs)}")
+        self.assertEqual(len(exempt_issues), 0, f"Expected exempt Issues count to be 0, but got {len(exempt_issues)}")
 
         # Verify methods were called
         self.mock_repo.get_pulls.assert_called_once_with(state='open')
