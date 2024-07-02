@@ -1,9 +1,10 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
+import logging
 
 # Import the functions and any necessary modules from your script
-from your_script import close_pulls_and_issues, close_pulls_and_issues_for_orgs, ignored_date, EXEMPT_LABELS, CLOSE_COMMENT
+from your_script import close_pulls_and_issues, close_pulls_and_issues_for_orgs
 
 class TestGitHubPRsIssues(unittest.TestCase):
 
@@ -89,4 +90,5 @@ class TestGitHubPRsIssues(unittest.TestCase):
         self.mock_issue.edit.assert_called_once_with(state='closed')
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()
